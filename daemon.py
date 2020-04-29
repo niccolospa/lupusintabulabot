@@ -434,7 +434,7 @@ class LupusBot(WithLogging):
 
         st += "".join([str("/") + str(p.index + 1) + " " + p.name + " " + "👎" * votes[p.index] + "\n"
                        for i, p in enumerate(self.groupchats[gpc].game.alivePlayers())])
-        self.send_message(gpc, st)
+        self.send_message(gpc, st) 
 
         if sum(votes) >= len(self.groupchats[gpc].game.alivePlayers()):
             self.groupchats[gpc].game.state = DAY_END
