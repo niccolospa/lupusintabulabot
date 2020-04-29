@@ -11,6 +11,7 @@ import time
 
 import sys
 from logger.defaults import WithLogging
+from messages import diz
 
 authf = open('../lupus_api', 'r')  # token bot
 
@@ -29,6 +30,7 @@ class Chat:
         else:
             self.name = info['title']
         self.game = None
+        self.language = "it"
         self.id = info['id']
 
 
@@ -120,14 +122,12 @@ class LupusBot(WithLogging):
 
         self.groupchats[gpc].game.setPlayers(self.groupchats[gpc].game.players)
 
-        self.send_message(gpc, "Tutti i giocatori confermati, "
-                               "i vostri ruoli sono comunicati in chat privata.\n\n"
-                               "Inizio della partita.")
+        self.send_message(gpc, diz["start_game"][self.groupchats[gpc].language])
 
         time.sleep(3)
         for player in self.groupchats[gpc].game.players:
-            self.send_message(player.chat_id,
-                              "Il tuo ruolo è %s." % (player.role.__str__().upper()))
+            self.send_message(player.chat_id, diz["role_is"][self.groupchats[gpc].language] % (
+                diz[str(player.role)][self.groupchats[gpc].language]))
 
     def send_message(self, chat_id, message, replyto=None):
         """
@@ -198,51 +198,44 @@ class LupusBot(WithLogging):
         if comw[0] == "start":  # start a new game
             if not isgroup:
 
-                self.send_message(chat_id, "Esegui questo comando in una chat di gruppo.", message_id)
+                self.send_message(chat_id, diz["command_in_group"][self.groupchats[chat_id].language], message_id)
             elif self.groupchats[chat_id].game:
-                self.send_message(chat_id, "C'è già una partita in corso in questo gruppo.", message_id)
+                self.send_message(chat_id, diz["game_running"][self.groupchats[chat_id].language], message_id)
             elif len(comw) < 2:
-                self.send_message(chat_id, "Perfavore, dimmi anche i ruoli che desideri. Ad esempio:"
-                                           "\n\n/start ccccccvll. Puoi vedere i ruoli disponibili usando /help.",
-                                  message_id)
+                self.send_message(chat_id, diz["roles_missing"][self.groupchats[chat_id].language], message_id)
             else:
                 try:
                     self.groupchats[chat_id].game = engine.Game(comw[1].lower().strip())
-                    self.send_message(chat_id, "Nuova partita creata. Cliccate qui 👉/in per entrare nella partita.",
-                                      message_id)
+                    self.send_message(chat_id, diz["new_game"][self.groupchats[chat_id].language], message_id)
 
                 except engine.UnrecognizedRole:
-                    self.send_message(chat_id, "Mi spiace, non sono riuscito ad interpretare la stringa dei ruoli."
-                                               " Usa /help per vedere quali sono i ruoli disponibili.", message_id)
+                    self.send_message(chat_id, diz["wrong_role"][self.groupchats[chat_id].language], message_id)
                 except engine.MoreThanOneWorP:
-                    self.send_message(chat_id, "Mi spiace, è possibile inserire solo un protettore e solo una "
-                                               "veggente.", message_id)
+                    self.send_message(chat_id, diz["wrong_wp_number"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "in":  # add a new player
             if not isgroup:
                 pass
             else:
                 if not self.groupchats[chat_id].game:
-                    self.send_message(chat_id, "Non c'è una partita in corso. Inizia una partita col comando /start",
-                                      message_id)
+                    self.send_message(chat_id, diz["no_game"][self.groupchats[chat_id].language], message_id)
                 else:
                     if self.groupchats[chat_id].game.state != PRE:
-                        self.send_message(chat_id, "La partita è già in corso, come minimo sei un po' in ritardo.",
-                                          message_id)
+                        self.send_message(chat_id, diz["late_player"][self.groupchats[chat_id].language], message_id)
                     else:
                         sender = m['from']['id']
 
                         for player in self.groupchats[chat_id].game.players:
                             if player.chat_id == sender:
-                                self.send_message(chat_id, "Sei già inserito e confermato, "
-                                                           "attendi gli altri giocatori.", message_id)
+                                self.send_message(chat_id, diz["already_confirmed"][self.groupchats[chat_id].language],
+                                                  message_id)
                                 return
 
                         if len(self.groupchats[chat_id].game.players) < len(self.groupchats[chat_id].game.rolelist):
                             self.groupchats[chat_id].game.players.append(Player(sender, m['from'],
                                                                                 len(self.groupchats[
                                                                                         chat_id].game.players)))
-                            self.send_message(chat_id, "Inserito (%d/%d)." % (
+                            self.send_message(chat_id, diz["insert"][self.groupchats[chat_id].language] % (
                                 len(self.groupchats[chat_id].game.players),
                                 len(self.groupchats[chat_id].game.rolelist)),
                                               message_id)
@@ -250,12 +243,11 @@ class LupusBot(WithLogging):
                                     self.groupchats[chat_id].game.rolelist):
                                 self.start_game(chat_id)
                         else:
-                            self.send_message(chat_id, "Mi spiace, numero totale di giocatori già raggiunto.",
+                            self.send_message(chat_id, diz["max_players"][self.groupchats[chat_id].language],
                                               message_id)
 
         elif comw[0] == "stop":  # stop game
-            self.send_message(chat_id, "Sei veramente sicuro di voler arrestare la partita?"
-                                       " Se sì, dai il comando /stopstop", message_id)
+            self.send_message(chat_id, diz["stop"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "stopstop":  # stop game for real!
             if not isgroup:
@@ -264,78 +256,85 @@ class LupusBot(WithLogging):
                     player = self.get_player(chat_id, gpc)
                     delete = True if player is not None else False
                     if self.groupchats[gpc].game.state != PRE:
-                        self.send_message(chat_id, "Ti sei suicidato.", message_id)
+                        self.send_message(chat_id, diz["kill_himself"][self.groupchats[gpc].language], message_id)
                         self.groupchats[gpc].game.euthanise(player.index)
-                        self.send_message(gpc, "%s si è suicidato." % player.name)
+                        self.send_message(gpc, diz["killed"][self.groupchats[gpc].language] % player.name)
                         break
                     else:
-                        self.send_message(chat_id, "Hai abbandonato la partita.", message_id)
+                        self.send_message(chat_id, diz["left_game"][self.groupchats[gpc].language], message_id)
                         del self.groupchats[gpc].game.players[player.index]
                         self.groupchats[gpc].game.recompute_player_index()
-                        self.send_message(gpc, "%s ha lasciato la partita." % player.name, message_id)
+                        self.send_message(gpc, diz["left"][self.groupchats[gpc].language] % player.name, message_id)
                         break
 
                 if not delete:
-                    self.send_message(chat_id, "Non mi risulta tu sia in nessuna partita.", message_id)
+                    self.send_message(chat_id, diz["no_present"][self.groupchats[chat_id].language], message_id)
 
             else:
                 if self.groupchats[chat_id].game is None:
-                    self.send_message(chat_id, "Nessun gioco attivo, niente da interrompere.", message_id)
+                    self.send_message(chat_id, diz["nothing_to_stop"][self.groupchats[chat_id].language], message_id)
                 else:
-                    self.stop_game(chat_id)
                     try:
                         for p in self.groupchats[chat_id].game.players:
-                            self.send_message(p.chat_id, "La partita è stata interrotta.")
+                            self.send_message(p.chat_id, diz["stopped"][self.groupchats[chat_id].language], message_id)
                     except ValueError:
                         pass
-                    self.send_message(chat_id, "Partita terminata.", message_id)
+                    self.stop_game(chat_id)
+                    self.send_message(chat_id, diz["finish"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "info":  # info
             if isgroup:
                 if self.groupchats[chat_id].game:
                     if self.groupchats[chat_id].game.state == PRE:
-                        self.send_message(chat_id, "In attesa di conferma dei giocatori.", message_id)
+                        self.send_message(chat_id, diz["waiting"][self.groupchats[chat_id].language], message_id)
 
                     elif self.groupchats[chat_id].game.state == NIGHT:
                         st = ""
                         if not self.groupchats[chat_id].game.stato_lupi:
-                            st += "Aspettando la decisione dei lupi\n"
+                            st += diz["w_wolf"][self.groupchats[chat_id].language]
                         if not self.groupchats[chat_id].game.stato_veggente:
-                            st += "Aspettando la decisione della veggente\n"
+                            st += diz["w_fortune"][self.groupchats[chat_id].language]
                         if not self.groupchats[chat_id].game.stato_protettore:
-                            st += "Aspettando la decisione del protettore\n"
+                            st += diz["w_protector"][self.groupchats[chat_id].language]
                         self.send_message(chat_id, st, message_id)
 
                     elif self.groupchats[chat_id].game.state == DAY:
-                        st = "Devono ancora votare: \n"
+                        st = diz["to_vote"][self.groupchats[chat_id].language]
                         st += "".join(["- " + p.name + "\n" for p in self.groupchats[chat_id].game.alivePlayers()
                                        if p.choice is None])
                         self.send_message(chat_id, st, message_id)
 
                     else:
-                        st = engine.stateName(self.groupchats[chat_id].game.state) + "\n"
-                        st += "\nGiocatori vivi:\n\n"
+                        st = engine.stateName(self.groupchats[chat_id].game.state, self.groupchats[chat_id].language) \
+                             + "\n" + diz["alive"][self.groupchats[chat_id].language]
                         for p in self.groupchats[chat_id].game.alivePlayers():
                             st += p.name + "\n"
                         self.send_message(chat_id, st, message_id)
                 else:
-                    self.send_message(chat_id,
-                                      "Nessuna partita attiva. Usa /start per iniziare una nuova partita, "
-                                      "/help per maggiori informazioni, /rule per le regole.",
-                                      message_id)
+                    self.send_message(chat_id, diz["no_game"][self.groupchats[chat_id].language], message_id)
             else:
-                self.send_message(chat_id, "Questo comando è veramente utile sono nella chat della partita. Prova "
-                                           "/help.", message_id)
+                self.send_message(chat_id, diz["info"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "help":
-            st = "Per iniziare una nuova partita, eseguire /start seguito da una stringa di ruoli:\n"
-            st += "C - Contadino\n"
-            st += "L - Lupo\n"
-            st += "V - Veggente\n"
-            st += "P - Protettore\n"
-            st += "F - Figlio del Lupo\n"
-            st += "\nPer fermare la partita, esegui /stop"
+            st = diz["to_start"][self.groupchats[chat_id].language]
             self.send_message(chat_id, st, message_id)
+
+        elif comw[0] == "rules":
+            self.send_message(chat_id, diz['rules'][self.groupchats[chat_id].language])
+
+        elif comw[0] == "language":
+            if isgroup:
+                if len(comw) < 2:
+                    self.send_message(chat_id, diz['language_one'][self.groupchats[chat_id].language])
+                else:
+                    language = comw[1].lower().strip()
+                    if language in ["en", "it"]:
+                        self.groupchats[chat_id].language = language
+                        self.send_message(chat_id, diz['language'][self.groupchats[chat_id].language])
+                    else:
+                        self.send_message(chat_id, diz['language_allowed'][self.groupchats[chat_id].language])
+            else:
+                self.send_message(chat_id, diz['language_group'][self.groupchats[chat_id].language], message_id)
 
         elif comw[0].isdigit():
             n = int(comw[0]) - 1
@@ -355,33 +354,33 @@ class LupusBot(WithLogging):
                                     not self.groupchats[gpcp].game.stato_lupi:
                                 pl.choice = n
                                 self.groupchats[gpcp].game.stato_lupi = True
-                                self.send_message(chat_id, "Selezionato.", message_id)
+                                self.send_message(chat_id, diz["select"][self.groupchats[gpcp].language], message_id)
                             else:
-                                self.send_message(chat_id, "Quel giocatore non è vivo.", message_id)
+                                self.send_message(chat_id, diz["no_alive"][self.groupchats[gpcp].language], message_id)
                         except (IndexError, KeyError):
-                            self.send_message(chat_id, "Quel giocatore non esiste.", message_id)
+                            self.send_message(chat_id, diz["no_exist"][self.groupchats[gpcp].language], message_id)
 
                     if pl.role == engine.veggente and not self.groupchats[gpcp].game.stato_veggente:
                         try:
                             if self.groupchats[gpcp].game.players[n].alive:
                                 pl.choice = n
                                 self.groupchats[gpcp].game.stato_veggente = True
-                                self.send_message(chat_id, "Selezionato.", message_id)
+                                self.send_message(chat_id, diz["select"][self.groupchats[gpcp].language], message_id)
                             else:
-                                self.send_message(chat_id, "Quel giocatore non è vivo.", message_id)
+                                self.send_message(chat_id, diz["no_alive"][self.groupchats[gpcp].language], message_id)
                         except (IndexError, KeyError):
-                            self.send_message(chat_id, "Quel giocatore non esiste.", message_id)
+                            self.send_message(chat_id, diz["no_exist"][self.groupchats[gpcp].language], message_id)
 
                     if pl.role == engine.protettore and not self.groupchats[gpcp].game.stato_protettore:
                         try:
                             if self.groupchats[gpcp].game.players[n].alive:
                                 pl.choice = n
                                 self.groupchats[gpcp].game.stato_protettore = True
-                                self.send_message(chat_id, "Selezionato.", message_id)
+                                self.send_message(chat_id, diz["select"][self.groupchats[gpcp].language], message_id)
                             else:
-                                self.send_message(chat_id, "Quel giocatore non è vivo.", message_id)
+                                self.send_message(chat_id, diz["no_alive"][self.groupchats[gpcp].language], message_id)
                         except (IndexError, KeyError):
-                            self.send_message(chat_id, "Quel giocatore non esiste.", message_id)
+                            self.send_message(chat_id, diz["no_exist"][self.groupchats[gpcp].language], message_id)
 
             else:
                 if self.groupchats[chat_id].game and self.groupchats[chat_id].game.state == DAY:
@@ -393,11 +392,11 @@ class LupusBot(WithLogging):
                                 p.choice = n
                                 self.repeat_votes(chat_id)
                             else:
-                                self.send_message(chat_id, "Quel giocatore non è vivo.", message_id)
+                                self.send_message(chat_id, diz["no_alive"][self.groupchats[chat_id].language], message_id)
                         except (IndexError, KeyError):
-                            self.send_message(chat_id, "Quel giocatore non esiste.", message_id)
+                            self.send_message(chat_id, diz["no_exist"][self.groupchats[chat_id].language], message_id)
                     else:
-                        self.send_message(chat_id, "Non fai parte di questa partita, oppure sei stato ucciso.",
+                        self.send_message(chat_id, diz["no_part"][self.groupchats[chat_id].language],
                                           message_id)
 
     def get_player(self, player_id, game_id):
@@ -412,12 +411,12 @@ class LupusBot(WithLogging):
         """Send votes summary"""
         st = ""
 
-        votes = [0 for p in self.groupchats[gpc].game.alivePlayers()]  # players
-        for p in self.groupchats[gpc].game.alivePlayers():  # players
+        votes = [0 for p in self.groupchats[gpc].game.players]
+        for p in self.groupchats[gpc].game.players:
             if hasattr(p, "choice") and (p.choice is not None):
                 votes[p.choice] += 1
 
-        st += "".join([str("/") + str(p.index + 1) + " " + p.name + " " + "👎" * votes[i] + "\n"
+        st += "".join([str("/") + str(p.index + 1) + " " + p.name + " " + "👎" * votes[p.index] + "\n"
                        for i, p in enumerate(self.groupchats[gpc].game.alivePlayers())])
         self.send_message(gpc, st)
 
@@ -428,7 +427,7 @@ class LupusBot(WithLogging):
         """Night message in the group chat;
         private message for wolves, protectors and watchers."""
 
-        self.send_message(gpc, "Scende la NOTTE ... 🌙.")
+        self.send_message(gpc, diz["night"][self.groupchats[gpc].language])
 
         alive_p = ""
         ap = self.groupchats[gpc].game.alivePlayers()
@@ -437,28 +436,23 @@ class LupusBot(WithLogging):
         time.sleep(3)
         for players in self.groupchats[gpc].game.wolves():
             if len(self.groupchats[gpc].game.wolves()) > 1:
-                st = "I lupi in gioco sono:\n"
+                st = diz["wolves"][self.groupchats[gpc].language]
                 st += "".join(["-" + p.name + "\n" for p in self.groupchats[gpc].game.wolves()])
-                st += "\nDecidete chi volete mangiare 🍴.\n" \
-                      "Puoi comunicare con gli altri lupi in questa chat 🗣️ inserendo \"@w\" e il messaggio.\n"
-                st += "Ricorda, vota solo un lupo! ⚠️"
+                st += diz["to_eat"][self.groupchats[gpc].language]
                 self.send_message(players.chat_id, st)
             else:
-                st = "Seleziona chi vuoi mangiare 🍴(mandami il numero come segue).\n"
-                st += "Pensaci bene, sei l'unico lupo in gioco.\n"
+                st = diz["to_eat_one"][self.groupchats[gpc].language]
                 self.send_message(players.chat_id, st)
 
             self.send_message(players.chat_id, alive_p)
 
         for players in self.groupchats[gpc].game.watcher():
-            self.send_message(players.chat_id, "Seleziona chi vuoi esaminare 🔎 "
-                                               "(mandami il numero come indicato sotto).\n")
+            self.send_message(players.chat_id, diz["to_watch"][self.groupchats[gpc].language])
 
             self.send_message(players.chat_id, alive_p)
 
         for players in self.groupchats[gpc].game.protector():
-            self.send_message(players.chat_id, "Seleziona chi vuoi proteggere 💑 "
-                                               "(mandami il numero come indicato sotto).\n")
+            self.send_message(players.chat_id, diz["to_protect"][self.groupchats[gpc].language])
 
             self.send_message(players.chat_id, alive_p)
 
@@ -471,11 +465,8 @@ class LupusBot(WithLogging):
 
         if ggame.state == RUOLI_ASSEGNATI:
             ggame.state = NIGHT
-            self.send_message(gpc, "Partita iniziata! \n\nSiete pregati di non comunicare se non nella "
-                                   "conversazione di gruppo o in chat privata *con il bot* 🤖. \n"
-                                   "I giocatori morti sono pregati di restare in silenzio 🤫.")
+            self.send_message(gpc, diz["game_started"][self.groupchats[gpc].language])
 
-            time.sleep(4)
             self.night_message(gpc)
             return
 
@@ -495,31 +486,34 @@ class LupusBot(WithLogging):
 
             if len(ret['killed_now']) == 0:
                 if ggame.figlio_del_lupo:
-                    self.send_message(gpc, "Questa notte è nato un nuovo lupo 🐺.")
+                    self.send_message(gpc, diz["new_wolf"][self.groupchats[gpc].language])
                     ggame.figlio_del_lupo = False
                 else:
-                    self.send_message(gpc, "Nessuno è morto questa notte 👀.")
+                    self.send_message(gpc, diz["no_kill"][self.groupchats[gpc].language])
             elif len(ret['killed_now']) == 1:
-                self.send_message(gpc, ggame.players[ret['killed_now'][0]].name + " è morto ☠️.")
+                self.send_message(gpc, ggame.players[ret['killed_now'][0]].name +
+                                  diz["is_died"][self.groupchats[gpc].language])
 
             for k in ret['killed_now']:
-                self.send_message(ggame.players[k].chat_id, "Sei morto! 👻️ E i morti non parlano 🤐.")
+                self.send_message(ggame.players[k].chat_id, diz["you_died"][self.groupchats[gpc].language])
 
             if "toview" in results:
                 try:
-                    self.send_message(ggame.watcher()[0].chat_id, "la persona in questione è " +
-                                      {True: "BUONA", False: "CATTIVA"}[ggame.players[results['toview']].role.good])
+                    self.send_message(ggame.watcher()[0].chat_id, diz["he_is"][self.groupchats[gpc].language] +
+                                      {True: diz["good"][self.groupchats[gpc].language],
+                                       False: diz["bad"][self.groupchats[gpc].language]
+                                       }[ggame.players[results['toview']].role.good])
                 except IndexError:
                     pass
 
             time.sleep(3)
 
-            self.send_message(gpc, "É GIORNO ☀️.")
+            self.send_message(gpc, diz["day"][self.groupchats[gpc].language])
 
             if ggame.state != FINISH:  # solo se la partita non è finita
                 time.sleep(3)
 
-                f = "Votate il giocatore da uccidere entro la fine del giorno 🔪.\n\n"
+                f = diz["vote"][self.groupchats[gpc].language]
 
                 ap = ggame.alivePlayers()
                 f += "".join(["/" + str(p.index + 1) + " " + p.name + "\n" for p in ap])
@@ -545,20 +539,20 @@ class LupusBot(WithLogging):
             if len(besters) == 0:
                 self.logger.error("ERROR")
             elif len(besters) == 1:
-                self.send_message(gpc, ggame.players[besters[0]].name + " è stato impiccato ☠️.")
+                self.send_message(gpc, ggame.players[besters[0]].name + diz["hanged"][self.groupchats[gpc].language])
                 di = besters[0]
             else:
-                st = "I seguenti giocatori sono in parità di voti ⚖️:\n"
+                st = diz["tied"][self.groupchats[gpc].language]
                 for i in besters:
                     st += ggame.players[i].name + "\n"
                 di = random.choice(besters)
-                st += "\nViene sorteggiato a caso %s, che viene impiccato 🔪." % ggame.players[di].name
+                st += diz["chance"][self.groupchats[gpc].language] % ggame.players[di].name
                 self.send_message(gpc, st)
 
             ggame.inputDay(di, len(self.groupchats[gpc].game.watcher()), len(self.groupchats[gpc].game.protector()))
 
             if ggame.state != FINISH:
-                self.send_message(ggame.players[di].chat_id, "Sei stato impiccato! ☠️ E i morti non parlano 🤐.")
+                self.send_message(ggame.players[di].chat_id, diz["you_hanged"][self.groupchats[gpc].language])
                 self.night_message(gpc)
             return
 
@@ -587,8 +581,8 @@ class LupusBot(WithLogging):
                 self.do_step(gpc)
 
             if self.groupchats[gpc].game and self.groupchats[gpc].game.state == FINISH:
-                self.send_message(gpc, "La partita è CONCLUSA. Risultato:\n\n" + engine.sideName(
-                    self.groupchats[gpc].game.win))
+                self.send_message(gpc, diz["results"][self.groupchats[gpc].language] + engine.sideName(
+                    self.groupchats[gpc].game.win, self.groupchats[gpc].language))
                 self.stop_game(gpc)
 
         while self.updates:

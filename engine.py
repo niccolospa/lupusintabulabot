@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+from messages import diz
 
 
 class GameError(Exception):
@@ -77,34 +78,34 @@ W_GOOD = 1
 W_BAD = 2
 
 
-def stateName(state):
+def stateName(state, language):
     if state == NIGHT:
-        return "NOTTE"
+        return diz["night_state"][language]
     elif state == NIGHT_END:
-        return "NOTTE CONCLUSA"
+        return diz["end_night"][language]
     elif state == DAY:
-        return "GIORNO"
+        return diz["day_state"][language]
     elif state == DAY_END:
-        return "GIORNO CONCLUSA"
+        return diz["end_day"][language]
     elif state == PRE:
         return "PRE"
     elif state == FINISH:
-        return "PARTITA CONCLUSA"
+        return diz["finish_state"][language]
     elif state == RUOLI_ASSEGNATI:
-        return "conto alla rovescia per la notte..."
+        return diz["roles_state"][language]
     else:
-        return "ERRORE"
+        return "ERROR"
 
 
-def sideName(side):
+def sideName(side, language):
     if side == W_TIE:
-        return "PARITÀ ⚖️"
+        return diz["tied_game"][language]
     elif side == W_GOOD:
-        return "I BUONI vincono! 👩🏻‍🌾 👨🏻‍🌾"
+        return diz["good_won"][language]
     elif side == W_BAD:
-        return "I LUPI vincono! 🐺"
+        return diz["bad_won"][language]
     else:
-        return "ERRORE"
+        return "ERROR"
 
 
 class Game:
