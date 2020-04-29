@@ -127,6 +127,8 @@ class LupusBot(WithLogging):
         time.sleep(3)
         for player in self.groupchats[gpc].game.players:
             self.send_message(player.chat_id, diz["role_is"][self.groupchats[gpc].language] % (
+                diz[player.role][self.groupchats[gpc].language]))
+            self.send_message(player.chat_id, diz["role_is"][self.groupchats[gpc].language] % (
                 diz[str(player.role)][self.groupchats[gpc].language]))
 
     def send_message(self, chat_id, message, replyto=None):
