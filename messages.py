@@ -96,6 +96,10 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                             "en": "Available languages are \"it\" and \"en\""},
        "language_group": {"it": "La lingua può essere settata solo nella chat di gruppo.",
                           "en": "A new language can be set only in the group chat."},
+       "already_playing": {"it": "Stai già giocando un'altra partita. "
+                                 "Finisci prima quella prima di iniziarne una nuova.",
+                           "en": "You are already playing in a different group. Let's "
+                                 "finish the old one before playing a new one"},
        "to_start": {"it": "Per iniziare una nuova partita, eseguire /start seguito da una stringa di ruoli:\n"
                           "C - Contadino 🚜\n"
                           "L - Lupo 🐺\n"

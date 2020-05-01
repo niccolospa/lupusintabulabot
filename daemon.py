@@ -232,16 +232,22 @@ class LupusBot(WithLogging):
                                 return
 
                         if len(self.groupchats[chat_id].game.players) < len(self.groupchats[chat_id].game.rolelist):
-                            self.groupchats[chat_id].game.players.append(Player(sender, m['from'],
-                                                                                len(self.groupchats[
-                                                                                        chat_id].game.players)))
-                            self.send_message(chat_id, diz["insert"][self.groupchats[chat_id].language] % (
-                                len(self.groupchats[chat_id].game.players),
-                                len(self.groupchats[chat_id].game.rolelist)),
-                                              message_id)
-                            if len(self.groupchats[chat_id].game.players) == len(
-                                    self.groupchats[chat_id].game.rolelist):
-                                self.start_game(chat_id)
+                            active_games = [self.get_player(sender, k) for k, v in self.groupchats.items() if
+                                            self.get_player(sender, k) is not None]
+                            if len(active_games) > 0:
+                                self.send_message(chat_id, diz["already_playing"][self.groupchats[chat_id].language],
+                                                  message_id)
+                            else:
+                                self.groupchats[chat_id].game.players.append(Player(sender, m['from'],
+                                                                                    len(self.groupchats[
+                                                                                            chat_id].game.players)))
+                                self.send_message(chat_id, diz["insert"][self.groupchats[chat_id].language] % (
+                                    len(self.groupchats[chat_id].game.players),
+                                    len(self.groupchats[chat_id].game.rolelist)),
+                                                  message_id)
+                                if len(self.groupchats[chat_id].game.players) == len(
+                                        self.groupchats[chat_id].game.rolelist):
+                                    self.start_game(chat_id)
                         else:
                             self.send_message(chat_id, diz["max_players"][self.groupchats[chat_id].language],
                                               message_id)
@@ -401,9 +407,12 @@ class LupusBot(WithLogging):
 
     def get_player(self, player_id, game_id):
         """Get player, given player chat_id and group chat_id"""
-        for p in self.groupchats[game_id].game.players:
-            if p.chat_id == player_id:
-                return p
+        if game_id in self.groupchats and self.groupchats[game_id].game:
+            for p in self.groupchats[game_id].game.players:
+                if p.chat_id == player_id:
+                    return p
+            else:
+                return None
         else:
             return None
 
@@ -506,13 +515,13 @@ class LupusBot(WithLogging):
                 except IndexError:
                     pass
 
-            time.sleep(3)
+            time.sleep(2)
 
             self.send_message(gpc, diz["day"][self.groupchats[gpc].language])
 
             if ggame.state != FINISH:  # solo se la partita non è finita
-                time.sleep(3)
 
+                time.sleep(2)
                 f = diz["vote"][self.groupchats[gpc].language]
 
                 ap = ggame.alivePlayers()
