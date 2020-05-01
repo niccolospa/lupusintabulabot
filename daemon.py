@@ -169,10 +169,12 @@ class LupusBot(WithLogging):
             elif gpc is not None and mm_strip is not None:  # message for wolves
                 recipient = mm_strip.split(" ")[0]
                 sender = m['from']['id']
-                if recipient == "w" and sender in [player.chat_id for player in self.groupchats[gpc].game.wolves()]:
-                    for players in self.groupchats[gpc].game.wolves():
-                        if players.chat_id != sender:
-                            self.send_message(players.chat_id, str(m['from']['first_name'] + ":" + m['text'][2:]))
+                if recipient == "w":
+                    game_id = [game for game in self.groupchats if self.get_player(sender, game)]
+                    if len(game_id)>0 and sender in [player.chat_id for player in self.groupchats[game_id[0]].game.wolves()]:
+                        for players in self.groupchats[game_id[0]].game.wolves():
+                            if players.chat_id != sender:
+                                self.send_message(players.chat_id, str(m['from']['first_name'] + ":" + m['text'][2:]))
 
     def stop_game(self, chat):
         """Stop game, delete chat"""
@@ -261,12 +263,12 @@ class LupusBot(WithLogging):
                 for gpc in self.groupchats:
                     player = self.get_player(chat_id, gpc)
                     delete = True if player is not None else False
-                    if self.groupchats[gpc].game.state != PRE:
+                    if delete and self.groupchats[gpc].game and self.groupchats[gpc].game.state != PRE:
                         self.send_message(chat_id, diz["kill_himself"][self.groupchats[gpc].language], message_id)
                         self.groupchats[gpc].game.euthanise(player.index)
                         self.send_message(gpc, diz["killed"][self.groupchats[gpc].language] % player.name)
                         break
-                    else:
+                    elif delete and self.groupchats[gpc].game:
                         self.send_message(chat_id, diz["left_game"][self.groupchats[gpc].language], message_id)
                         del self.groupchats[gpc].game.players[player.index]
                         self.groupchats[gpc].game.recompute_player_index()
@@ -393,14 +395,17 @@ class LupusBot(WithLogging):
                     p = self.get_player(m['from']['id'], chat_id)
 
                     if p is not None:
-                        try:
-                            if self.groupchats[chat_id].game.players[n].alive:
-                                p.choice = n
-                                self.repeat_votes(chat_id)
-                            else:
-                                self.send_message(chat_id, diz["no_alive"][self.groupchats[chat_id].language], message_id)
-                        except (IndexError, KeyError):
-                            self.send_message(chat_id, diz["no_exist"][self.groupchats[chat_id].language], message_id)
+                        if p.alive:
+                            try:
+                                if self.groupchats[chat_id].game.players[n].alive:
+                                    p.choice = n
+                                    self.repeat_votes(chat_id)
+                                else:
+                                    self.send_message(chat_id, diz["no_alive"][self.groupchats[chat_id].language], message_id)
+                            except (IndexError, KeyError):
+                                self.send_message(chat_id, diz["no_exist"][self.groupchats[chat_id].language], message_id)
+                        else:
+                            self.send_message(chat_id, diz["you_died"][self.groupchats[chat_id].language], message_id)
                     else:
                         self.send_message(chat_id, diz["no_part"][self.groupchats[chat_id].language],
                                           message_id)
