@@ -32,10 +32,10 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                             "en": "Run this command in a group chat"},
        "game_running": {"it": "C'è già una partita in corso in questo gruppo.",
                         "en": "There’s already a game going on in this group."},
-       "roles_missing": {"it": "Per favore, dimmi anche i ruoli che desideri. Ad esempio:"
-                               "\n/start ccccccvll.\nPuoi vedere i ruoli disponibili usando /help.",
-                         "en": "Tell me which roles you want. For example:"
-                               "\n/start ccccccvll.\nYou can see the roles available using /help."},
+       #"roles_missing": {"it": "Per favore, dimmi anche i ruoli che desideri. Ad esempio:"
+       #                        "\n/start ccccccvll.\nPuoi vedere i ruoli disponibili usando /help.",
+       #                  "en": "Tell me which roles you want. For example:"
+       #                        "\n/start ccccccvll.\nYou can see the roles available using /help."},
        "new_game": {"it": "Nuova partita creata. Cliccate qui 👉/in per entrare nella partita.",
                     "en": "New game created. Click here 👉/in to enter the game."},
        "wrong_role": {"it": "Mi spiace, non sono riuscito ad interpretare la stringa dei ruoli."
@@ -204,5 +204,22 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
        "Protettore": {"it": "PROTETTORE 👮‍♂️",
                       "en": "PROTECTOR 👮‍♂️"},
        "Figlio del Lupo": {"it": "FIGLIO DEL LUPO 🐾️",
-                           "en": "WEREWOLF'S SON 🐾️"}
+                           "en": "WEREWOLF'S SON 🐾️"},
+       "n_players": {"it": "Quanti giocatori vuoi inserire? (mandami \"/\" sequito dal numero, ad esempio /7)",
+                     "en": "How many players? (send me \"/\" followed by the desired number, for example /7)"},
+       "n_wolves": {"it": "Quanti lupi vuoi inserire? 🐺 (mandami \"/\" sequito dal numero, ad esempio /1)",
+                    "en": "How many werewolves do you want? 🐺 "
+                          "(send me \"/\" followed by the desired number, for example /1)"},
+       "n_watcher": {"it": "Vuoi inserire la veggente? 🧙‍♀ /si /no",
+                     "en": "Do you want to include the fortune teller? 🧙‍♀ /yes /no"},
+       "n_protector": {"it": "Vuoi inserire il protettore 👮‍♂ /si /no?",
+                       "en": "Do you want to include the protector? 👮‍♂ /yes /no"},
+       "n_son": {"it": "Quanti figli del lupo vuoi inserire? 🐾 "
+                       "(mandami \"/\" sequito dal numero ad esempio /1 oppure /no)",
+                 "en": "How many werewolves son do you want to include? 🐾 "
+                       "(send me \"/\" followed by the desired number, for example /1 otherwise /no)"},
+       "wrong_number": {"it": "I ruoli richiesti sono incompatibili con il numero di giocatori atteso. "
+                              "Vuoi settare il numero di giocatori pari a %s? /si /no",
+                        "en": "Required roles are incompatible with the expected number of players. "
+                              "Do you want to play with %s players? /si /no"}
        }

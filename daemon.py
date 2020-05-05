@@ -12,7 +12,7 @@ import sys
 from logger.defaults import WithLogging
 from messages import diz
 
-token_file = open('../lupus_api', 'r')  # token bot
+token_file = open('../lupus_api_test', 'r')  # token bot
 
 token = token_file.read().strip()
 token_file.close()
@@ -29,6 +29,7 @@ class Chat:
         else:
             self.name = info['title']
         self.game = None
+        self.define_rolestring = None
         self.language = "it"
         self.id = info['id']
 
@@ -126,8 +127,6 @@ class LupusBot(WithLogging):
         time.sleep(3)
         for player in self.groupchats[gpc].game.players:
             self.send_message(player.chat_id, diz["role_is"][self.groupchats[gpc].language] % (
-                diz[player.role][self.groupchats[gpc].language]))
-            self.send_message(player.chat_id, diz["role_is"][self.groupchats[gpc].language] % (
                 diz[str(player.role)][self.groupchats[gpc].language]))
 
     def send_message(self, chat_id, message, replyto=None):
@@ -205,17 +204,19 @@ class LupusBot(WithLogging):
             elif self.groupchats[chat_id].game:
                 self.send_message(chat_id, diz["game_running"][self.groupchats[chat_id].language], message_id)
             elif len(comw) < 2:
-                self.send_message(chat_id, diz["roles_missing"][self.groupchats[chat_id].language], message_id)
+                self.send_message(chat_id, diz["n_players"][self.groupchats[chat_id].language], message_id)
+                self.groupchats[chat_id].define_rolestring = engine.DefineGame()
+                #self.send_message(chat_id, diz["roles_missing"][self.groupchats[chat_id].language], message_id)
             else:
                 try:
-                    self.groupchats[chat_id].game = engine.Game(comw[1].lower().strip())
+                    self.groupchats[chat_id].game = engine.Game.from_rolestring(comw[1].lower().strip())
                     self.send_message(chat_id, diz["new_game"][self.groupchats[chat_id].language], message_id)
 
                 except engine.UnrecognizedRole:
                     self.send_message(chat_id, diz["wrong_role"][self.groupchats[chat_id].language], message_id)
                 except engine.MoreThanOneWorP:
                     self.send_message(chat_id, diz["wrong_wp_number"][self.groupchats[chat_id].language], message_id)
-                except engine.NoLupus:
+                except engine.NoWerewolf:
                     self.send_message(chat_id, diz["no_lupus"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "in":  # add a new player
@@ -283,7 +284,11 @@ class LupusBot(WithLogging):
 
             else:
                 if self.groupchats[chat_id].game is None:
-                    self.send_message(chat_id, diz["nothing_to_stop"][self.groupchats[chat_id].language], message_id)
+                    if self.groupchats[chat_id].define_rolestring is None:
+                        self.send_message(chat_id, diz["nothing_to_stop"][self.groupchats[chat_id].language], message_id)
+                    else:
+                        self.groupchats[chat_id].define_rolestring = None
+                        self.send_message(chat_id, diz["stopped"][self.groupchats[chat_id].language], message_id)
                 else:
                     try:
                         for p in self.groupchats[chat_id].game.players:
@@ -359,7 +364,7 @@ class LupusBot(WithLogging):
                         gpcp = gpc
 
                 if pl is not None:
-                    if pl.role == engine.lupo:
+                    if pl.role == engine.werewolf:
                         try:
                             if self.groupchats[gpcp].game.players[n].alive and \
                                     not self.groupchats[gpcp].game.stato_lupi:
@@ -371,7 +376,7 @@ class LupusBot(WithLogging):
                         except (IndexError, KeyError):
                             self.send_message(chat_id, diz["no_exist"][self.groupchats[gpcp].language], message_id)
 
-                    if pl.role == engine.veggente and not self.groupchats[gpcp].game.stato_veggente:
+                    if pl.role == engine.watcher and not self.groupchats[gpcp].game.stato_veggente:
                         try:
                             if self.groupchats[gpcp].game.players[n].alive:
                                 pl.choice = n
@@ -382,7 +387,7 @@ class LupusBot(WithLogging):
                         except (IndexError, KeyError):
                             self.send_message(chat_id, diz["no_exist"][self.groupchats[gpcp].language], message_id)
 
-                    if pl.role == engine.protettore and not self.groupchats[gpcp].game.stato_protettore:
+                    if pl.role == engine.protector and not self.groupchats[gpcp].game.stato_protettore:
                         try:
                             if self.groupchats[gpcp].game.players[n].alive:
                                 pl.choice = n
@@ -412,6 +417,56 @@ class LupusBot(WithLogging):
                     else:
                         self.send_message(chat_id, diz["no_part"][self.groupchats[chat_id].language],
                                           message_id)
+
+                elif self.groupchats[chat_id].define_rolestring:
+                    if self.groupchats[chat_id].define_rolestring.stato == "players":
+                        self.groupchats[chat_id].define_rolestring.set_players(n+1)
+                        self.send_message(chat_id, diz["n_wolves"][self.groupchats[chat_id].language], message_id)
+                    elif self.groupchats[chat_id].define_rolestring.stato == "wolf":
+                        self.groupchats[chat_id].define_rolestring.set_wolves(n+1)
+                        self.send_message(chat_id, diz["n_watcher"][self.groupchats[chat_id].language], message_id)
+                    elif self.groupchats[chat_id].define_rolestring.stato == "son":
+                        self.groupchats[chat_id].define_rolestring.set_son(n+1)
+                        roles = self.groupchats[chat_id].define_rolestring
+                        try:
+                            self.groupchats[chat_id].game = engine.Game.from_questions(
+                                roles.n_players, roles.n_wolves, roles.n_watcher, roles.n_protector, roles.n_son)
+                            self.send_message(chat_id, diz["new_game"][self.groupchats[chat_id].language], message_id)
+                        except engine.WrongNumberPlayers:
+                            n_players = roles.n_wolves + roles.n_watcher + roles.n_protector + roles.n_son
+                            self.groupchats[chat_id].define_rolestring.set_players(n_players)
+                            self.groupchats[chat_id].define_rolestring.set_state("wrong")
+                            self.send_message(chat_id, diz["wrong_number"][self.groupchats[chat_id].language]
+                                              % n_players, message_id)
+
+        elif comw[0] in ["si", "yes", "no"]:
+            if isgroup and self.groupchats[chat_id].define_rolestring:
+                n = 0 if comw[0] == "no" else 1
+                if self.groupchats[chat_id].define_rolestring.stato == "watcher":
+                    self.groupchats[chat_id].define_rolestring.set_watcher(n)
+                    self.send_message(chat_id, diz["n_protector"][self.groupchats[chat_id].language], message_id)
+                elif self.groupchats[chat_id].define_rolestring.stato == "protector":
+                    self.groupchats[chat_id].define_rolestring.set_protector(n)
+                    self.send_message(chat_id, diz["n_son"][self.groupchats[chat_id].language], message_id)
+                elif self.groupchats[chat_id].define_rolestring.stato == "son":
+                    self.groupchats[chat_id].define_rolestring.set_son(n)
+                    roles = self.groupchats[chat_id].define_rolestring
+                    try:
+                        self.groupchats[chat_id].game = engine.Game.from_questions(
+                            roles.n_players, roles.n_wolves, roles.n_watcher, roles.n_protector, roles.n_son)
+                        self.send_message(chat_id, diz["new_game"][self.groupchats[chat_id].language], message_id)
+                    except engine.WrongNumberPlayers:
+                        n_players = roles.n_wolves + roles.n_watcher + roles.n_protector + roles.n_son
+                        self.send_message(chat_id, diz["wrong_number"][self.groupchats[chat_id].language]
+                                          % n_players, message_id)
+                elif self.groupchats[chat_id].define_rolestring.stato == "wrong" and n == 1:
+                    roles = self.groupchats[chat_id].define_rolestring
+                    self.groupchats[chat_id].game = engine.Game.from_questions(
+                        roles.n_players, roles.n_wolves, roles.n_watcher, roles.n_protector, roles.n_son)
+                    self.send_message(chat_id, diz["new_game"][self.groupchats[chat_id].language], message_id)
+                else:
+                    self.groupchats[chat_id].define_rolestring = None
+                    self.send_message(chat_id, diz["stopped"][self.groupchats[chat_id].language], message_id)
 
     def get_player(self, player_id, game_id):
         """Get player, given player chat_id and group chat_id"""
