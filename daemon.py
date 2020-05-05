@@ -1,6 +1,5 @@
-# !/usr/local/bin/python
-# -*- coding: utf-8 -*-
-
+#!/usr/local/bin/python
+#-*- coding: utf-8 -*-
 
 import engine
 from engine import RUOLI_ASSEGNATI, NIGHT_END, NIGHT, DAY, DAY_END, PRE, FINISH
@@ -13,10 +12,10 @@ import sys
 from logger.defaults import WithLogging
 from messages import diz
 
-authf = open('../lupus_api', 'r')  # token bot
+token_file = open('../lupus_api', 'r')  # token bot
 
-auth = authf.read().strip()
-authf.close()
+token = token_file.read().strip()
+token_file.close()
 
 
 class StatusNotOk(Exception):
@@ -91,7 +90,7 @@ class LupusBot(WithLogging):
         return r
 
     def get_messages(self):
-        http = "https://api.telegram.org/bot%s/getUpdates" % auth + "?offset=%d" % self.lastid
+        http = "https://api.telegram.org/bot%s/getUpdates" % token + "?offset=%d" % self.lastid
 
         r = self.safe_request(http, {})
 
@@ -155,7 +154,7 @@ class LupusBot(WithLogging):
 
         if replyto:
             args['reply_to_message_id'] = replyto
-        http = "https://api.telegram.org/bot%s/sendMessage" % auth
+        http = "https://api.telegram.org/bot%s/sendMessage" % token
 
         self.safe_request(http, args)
 
@@ -216,6 +215,8 @@ class LupusBot(WithLogging):
                     self.send_message(chat_id, diz["wrong_role"][self.groupchats[chat_id].language], message_id)
                 except engine.MoreThanOneWorP:
                     self.send_message(chat_id, diz["wrong_wp_number"][self.groupchats[chat_id].language], message_id)
+                except engine.NoLupus:
+                    self.send_message(chat_id, diz["no_lupus"][self.groupchats[chat_id].language], message_id)
 
         elif comw[0] == "in":  # add a new player
             if not isgroup:

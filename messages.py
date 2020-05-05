@@ -44,6 +44,8 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                             " You can use /help for the available roles."},
        "wrong_wp_number": {"it": "Mi spiace, è possibile inserire solo un protettore e solo una veggente.",
                            "en": "I'm sorry, you can add only one protector and one fortune teller."},
+       "no_lupus": {"it": "Inserisci almeno un lupo nel gioco",
+                    "en": "You should add at least one werewolf"},
        "no_game": {"it": "Non c'è una partita in corso. Usa /start per iniziare una nuova partita,"
                          " /help per maggiori informazioni, /rules per le regole.",
                    "en": "There is no game going on here. You can use /start to start a new match, /help for more "
@@ -86,7 +88,7 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                    "en": "Still have to vote:\n"},
        "alive": {"it": "\nGiocatori vivi:\n\n",
                  "en": "\nAlive players:\n\n"},
-       "info": {"it": "Questo comando è veramente utile sono nella chat della partita. Prova /help.",
+       "info": {"it": "Questo comando è veramente utile solo nella chat della partita. Prova /help.",
                 "en": "This command is useful only in the game chat. Try /help."},
        "language": {"it": "Italiano settato.",
                     "en": "English has been set."},

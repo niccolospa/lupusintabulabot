@@ -13,6 +13,10 @@ class StateError(GameError):
     pass
 
 
+class NoLupus(GameError):
+    pass
+
+
 class NotAliveError(GameError):
     pass
 
@@ -128,6 +132,8 @@ class Game:
     def check_roles(self, rolestring):
         if len(rolestring.split("v")) > 2 or len(rolestring.split("p")) > 2:
             raise MoreThanOneWorP
+        if "l" not in rolestring:
+            raise NoLupus
 
     def setPlayers(self, players):
         """Give roles to players"""
