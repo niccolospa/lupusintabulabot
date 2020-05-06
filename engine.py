@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 
 import random
 from messages import diz
@@ -51,21 +51,11 @@ class Role:
 
 
 peasant = Role("Contadino", True, False)
-werewolf = Role("Lupo", False, False)
-watcher = Role("Veggente", True, True)
-protector = Role("Protettore", True, True)
-werewolf_son = Role("Figlio del Lupo", True, True)
+werewolf = Role("werewolf", False, False)
+watcher = Role("watcher", True, True)
+protector = Role("protector", True, True)
+werewolf_son = Role("son", True, True)
 
-
-
-NIGHT = 0
-NIGHT_END = 0.5
-DAY = 1
-DAY_END = 3
-FINISH = -1
-PRE = -2
-RUOLI_ASSEGNATI = -3
-TO_DEFINE_PLAYERS = -4
 
 W_TIE = 0
 W_GOOD = 1
@@ -73,20 +63,8 @@ W_BAD = 2
 
 
 def stateName(state, language):
-    if state == NIGHT:
-        return diz["night_state"][language]
-    elif state == NIGHT_END:
-        return diz["end_night"][language]
-    elif state == DAY:
-        return diz["day_state"][language]
-    elif state == DAY_END:
-        return diz["end_day"][language]
-    elif state == PRE:
-        return "PRE"
-    elif state == FINISH:
-        return diz["finish_state"][language]
-    elif state == RUOLI_ASSEGNATI:
-        return diz["roles_state"][language]
+    if state in diz:
+        return diz[state][language]
     else:
         return "ERROR"
 
@@ -126,6 +104,7 @@ def ch2role(c):
 
 
 class DefineGame:
+    """Define Game from bot questions"""
     def __init__(self):
         self.stato = "players"
         self.n_players = None
@@ -163,18 +142,18 @@ class Game:
     def __init__(self, rolelist):
         self.rolelist = rolelist
         self.turn = 0
-        self.state = PRE
-        self.stato_lupi = False
-        self.stato_veggente = False if watcher in rolelist else True
-        self.stato_protettore = False if protector in rolelist else True
-        self.figlio_del_lupo = False
+        self.state = "PRE"
+        self.special = {'werewolf': False,
+                        'watcher': False if watcher in rolelist else True,
+                        'protector': False if protector in rolelist else True}
+        self.son_state = False
         self.players = []
 
     @staticmethod
     def from_rolestring(rolestring):
+        """Initialize Game given list of roles"""
         check_roles(rolestring)
         rolelist = []
-
         for c in rolestring:
             r = ch2role(c)
             rolelist.append(r)
@@ -182,12 +161,12 @@ class Game:
 
     @staticmethod
     def from_questions(n_players, n_wolves, n_watcher, n_protector, n_son):
+        """Initialize Game given players, werewolves, watchers, protectors and sons numbers"""
         rolelist = [werewolf] * n_wolves
         rolelist += [watcher] * n_watcher
         rolelist += [protector] * n_protector
         rolelist += [werewolf_son] * n_son
         n_contadini = n_players - len(rolelist)
-        print(rolelist)
         if n_contadini < 0:
             raise WrongNumberPlayers
         rolelist += [peasant] * n_contadini
@@ -203,7 +182,7 @@ class Game:
         for i, p in enumerate(players):
             p.role = self.rolelist[i]
 
-        self.state = RUOLI_ASSEGNATI
+        self.state = "RUOLI_ASSEGNATI"
 
     def alivePlayers(self):
         return [p for p in self.players if p.alive]
@@ -226,15 +205,15 @@ class Game:
     def checkEnd(self):
         """Check if the game end"""
         if len(self.alivePlayers()) == 0:
-            self.state = FINISH
+            self.state = "FINISH"
             self.win = W_TIE
             return
         if len(self.goodPlayers()) == 0:
-            self.state = FINISH
+            self.state = "FINISH"
             self.win = W_BAD
             return
         if len(self.badPlayers()) == 0:
-            self.state = FINISH
+            self.state = "FINISH"
             self.win = W_GOOD
 
     def euthanise(self, toe):
@@ -245,7 +224,7 @@ class Game:
 
     def inputNight(self, results):
         """Night step"""
-        if self.state != NIGHT_END:
+        if self.state != "NIGHT_END":
             raise StateError
 
         killed_now = []
@@ -266,7 +245,7 @@ class Game:
                 elif tp != tm and self.players[tm].role != werewolf_son:
                     killed_now.append(tm)
                 elif self.players[tm].role == werewolf_son:
-                    self.figlio_del_lupo = True
+                    self.son_state = True
                     self.players[tm].role = werewolf
 
             out['killed_now'] = killed_now
@@ -281,7 +260,7 @@ class Game:
         for tokill in killed_now:
             self.players[tokill].alive = False
 
-        self.state = DAY
+        self.state = "DAY"
 
         self.checkEnd()
 
@@ -294,9 +273,9 @@ class Game:
 
         self.players[voted].alive = False
 
-        self.state = NIGHT
-        self.stato_veggente = False if n_veggenti >= 1 else True
-        self.stato_protettore = False if n_protettori >= 1 else True
+        self.state = "NIGHT"
+        self.special['watcher'] = False if n_veggenti >= 1 else True
+        self.special['protector'] = False if n_protettori >= 1 else True
 
         self.checkEnd()
 
