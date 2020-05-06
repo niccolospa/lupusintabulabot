@@ -1,5 +1,4 @@
 
-
 diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veggente 🧙‍♀️, protettore 👮‍♀️, figlio del "
                        "lupo 🐾 (buoni) e lupi 🐺 (cattivi).\n"
                        "La partita può avere inizio, si alternano 2 fasi:\n"
@@ -32,10 +31,11 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                             "en": "Run this command in a group chat"},
        "game_running": {"it": "C'è già una partita in corso in questo gruppo.",
                         "en": "There’s already a game going on in this group."},
-       #"roles_missing": {"it": "Per favore, dimmi anche i ruoli che desideri. Ad esempio:"
-       #                        "\n/start ccccccvll.\nPuoi vedere i ruoli disponibili usando /help.",
-       #                  "en": "Tell me which roles you want. For example:"
-       #                        "\n/start ccccccvll.\nYou can see the roles available using /help."},
+       "permission": {"it": "Mandami un messaggio in privato per favore, solo così potrò comunicarti "
+                            "il tuo ruolo nel gioco.",
+                      "en": "Send me a private message, please. Only in this way I can send you your game role."},
+       "permission2": {"it": "%s non ho potuto mandarti un messaggio in privato perché mi hai bloccato.",
+                       "en": "%s I couldn't send you a private message since you blocked me."},
        "new_game": {"it": "Nuova partita creata. Cliccate qui 👉/in per entrare nella partita.",
                     "en": "New game created. Click here 👉/in to enter the game."},
        "wrong_role": {"it": "Mi spiace, non sono riuscito ad interpretare la stringa dei ruoli."
@@ -56,6 +56,8 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                              "en": "You're in. Wait for the others."},
        "insert": {"it": "Inserito (%d/%d).",
                   "en": "Confirmed (%d/%d)."},
+       "confirmed": {"it": "Inserito.",
+                     "en": "Confirmed."},
        "max_players": {"it": "Mi spiace, numero totale di giocatori già raggiunto.",
                        "en": "I'm sorry, the maximum number of players is reached."},
        "stop": {"it": "Sei veramente sicuro di voler arrestare la partita? Se sì, dai il comando /stopstop",
@@ -177,18 +179,22 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                       "en": "You were hanged! ☠️ And dead people don't talk 🤐."},
        "results": {"it": "La partita è CONCLUSA. Risultato:\n\n",
                    "en": "Game Over. Results:\n\n"},
-       "night_state": {"it": "NOTTE",
+       "NIGHT": {"it": "NOTTE",
                        "en": "NIGHT"},
-       "end_night": {"it": "NOTTE CONCLUSA",
+       "NIGHT_END": {"it": "NOTTE CONCLUSA",
                      "en": "NIGHT ENDS"},
-       "day_state": {"it": "GIORNO",
+       "DAY": {"it": "GIORNO",
                      "en": "DAY"},
-       "end_day": {"it": "GIORNO CONCLUSO",
+       "DAY_END": {"it": "GIORNO CONCLUSO",
                    "en": "DAY ENDS"},
-       "finish_state": {"it": "PARTITA CONCLUSA",
+       "FINISH": {"it": "PARTITA CONCLUSA",
                         "en": "GAME OVER"},
-       "roles_state": {"it": "conto alla rovescia per la notte...",
-                       "en": "countdown to the night..."},
+       "RUOLI_ASSEGNATI": {"it": "conto alla rovescia per la notte...",
+                           "en": "countdown to the night..."},
+       "TO_DEFINE_PLAYERS": {"it": "Definendo la partita...",
+                             "en": "Defining the game..."},
+       "PRE": {"it": "PRE",
+               "en": "PRE"},
        "tied_game": {"it": "PARITÀ ⚖️",
                      "en": "TIED ⚖️"},
        "bad_won": {"it": "I LUPI vincono! 🐺",
@@ -197,17 +203,17 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
                     "en": "GOOD won! 👩🏻‍🌾 👨🏻‍🌾"},
        "Contadino": {"it": "CONTADINO 🚜",
                      "en": "PEASANT🚜"},
-       "Lupo": {"it": "LUPO 🐺",
+       "werewolf": {"it": "LUPO 🐺",
                 "en": "WEREWOLF 🐺"},
-       "Veggente": {"it": "VEGGENTE 🧙‍♀️",
-                    "en": "FORTUNE TELLER 🧙‍♀️"},
-       "Protettore": {"it": "PROTETTORE 👮‍♂️",
+       "watcher": {"it": "VEGGENTE 🧙‍♀️",
+                   "en": "FORTUNE TELLER 🧙‍♀️"},
+       "protector": {"it": "PROTETTORE 👮‍♂️",
                       "en": "PROTECTOR 👮‍♂️"},
-       "Figlio del Lupo": {"it": "FIGLIO DEL LUPO 🐾️",
+       "son": {"it": "FIGLIO DEL LUPO 🐾️",
                            "en": "WEREWOLF'S SON 🐾️"},
-       "n_players": {"it": "Quanti giocatori vuoi inserire? (mandami \"/\" sequito dal numero, ad esempio /7)",
+       "n_players": {"it": "Quanti giocatori vuoi inserire? (mandami \"/\" seguito dal numero, ad esempio /7)",
                      "en": "How many players? (send me \"/\" followed by the desired number, for example /7)"},
-       "n_wolves": {"it": "Quanti lupi vuoi inserire? 🐺 (mandami \"/\" sequito dal numero, ad esempio /1)",
+       "n_wolves": {"it": "Quanti lupi vuoi inserire? 🐺 (mandami \"/\" seguito dal numero, ad esempio /1)",
                     "en": "How many werewolves do you want? 🐺 "
                           "(send me \"/\" followed by the desired number, for example /1)"},
        "n_watcher": {"it": "Vuoi inserire la veggente? 🧙‍♀ /si /no",
@@ -215,11 +221,11 @@ diz = {"rules": {"it": "I partecipanti ricevono un ruolo tra contadino 🚜, veg
        "n_protector": {"it": "Vuoi inserire il protettore 👮‍♂ /si /no?",
                        "en": "Do you want to include the protector? 👮‍♂ /yes /no"},
        "n_son": {"it": "Quanti figli del lupo vuoi inserire? 🐾 "
-                       "(mandami \"/\" sequito dal numero ad esempio /1 oppure /no)",
-                 "en": "How many werewolves son do you want to include? 🐾 "
+                       "(mandami \"/\" seguito dal numero ad esempio /1 oppure /no)",
+                 "en": "How many werewolves sons do you want to include? 🐾 "
                        "(send me \"/\" followed by the desired number, for example /1 otherwise /no)"},
        "wrong_number": {"it": "I ruoli richiesti sono incompatibili con il numero di giocatori atteso. "
-                              "Vuoi settare il numero di giocatori pari a %s? /si /no",
+                              "Vuoi settare il numero di giocatori a %s? /si /no",
                         "en": "Required roles are incompatible with the expected number of players. "
-                              "Do you want to play with %s players? /si /no"}
+                              "Do you want to play with %s players? /yes /no"}
        }

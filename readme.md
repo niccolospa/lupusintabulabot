@@ -25,7 +25,7 @@ _At dawn, everyone turns back to its villager state and the sun discloses the re
 2. **Each participant starts a private chat with lupus bot** - don't forget this!
 3. Just digit **_/start_** in your group conversation and **it's done**, you can simply follow the instructions that you'll receive!
 
-Note: Don't worry! In case you need you can also use commands **/help**,**/rules**,**/status** in your group chat!
+Note: Don't worry! In case you need you can also use commands **/help**,**/rules**,**/info** in your group chat!
 
 ### List of commands
 Below a brief glossary of the few commands that you will use during the game:
@@ -35,7 +35,7 @@ Below a brief glossary of the few commands that you will use during the game:
 * **/_number_**: vote to kill/know/protect villager _number_. This command, depending on circumstances, is used in private or group conversation and allows to express the self-choice.
 * **@w**: send messages to other werewolves. This command, used in private chat and only by werewolves, allows werewolves to communicate directly and choose their victim.
 * **/help**: help command, use this command if you get confused or you don't remember what was the command syntax!
-* **/status**: *Where we are at?* Use this command in the group chat to get the current status of the game.
+* **/info**: *Where we are at?* Use this command in the group chat to get the current status of the game.
 * **/rules**: Did you forget the rules? Don't worry, type this command on the group chat and there they are! 
 * **/language**: set the language (*it* or *en*, *it* is the default).
 
