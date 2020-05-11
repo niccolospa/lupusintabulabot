@@ -25,7 +25,7 @@ _At dawn, everyone turns back to its villager state and the sun discloses the re
 2. **Each participant starts a private chat with lupus bot** - don't forget this!
 3. Just digit **_/start_** in your group conversation and **it's done**, you can simply follow the instructions that you'll receive!
 
-Note: Don't worry! In case you need you can also use commands **/help**,**/rules**,**/status** in your group chat!
+Note: Don't worry! In case you need you can also use commands **/help**,**/rules**,**/info** in your group chat!
 
 ### List of commands
 Below a brief glossary of the few commands that you will use during the game:
